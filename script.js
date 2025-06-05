@@ -20,7 +20,10 @@ const DEFAULT_CITY = 'Logroño, La Rioja';
 async function getCoordinates(address) {
     try {
         const res = await fetch(`${NOMINATIM_URL}?q=${encodeURIComponent(address)}&format=json&limit=1`, {
-            headers: { 'Accept-Language': 'es', 'User-Agent': 'aparcamiento-motos-demo' }
+            headers: {
+                'Accept-Language': 'es',
+                'User-Agent': 'AparcamientosMotos/1.0 (example@example.com)'
+            }
         });
         const data = await res.json();
         if (data && data.length) {
@@ -46,7 +49,7 @@ async function fetchParkingLots(coords) {
     const url = `${OVERPASS_URL}?data=${encodeURIComponent(query)}`;
     try {
         const res = await fetch(url, {
-            headers: { 'User-Agent': 'aparcamiento-motos-demo' }
+            headers: { 'User-Agent': 'AparcamientosMotos/1.0 (example@example.com)' }
         });
         const data = await res.json();
         return data.elements.map(el => ({
@@ -112,11 +115,15 @@ function updateMap(userLocation, parkingLots) {
             .addTo(map);
     });
 
-    const bounds = [
-        [userLocation.lat, userLocation.lon],
-        ...parkingLots.map(p => [p.lat, p.lon])
-    ];
-    map.fitBounds(bounds, { padding: [20, 20] });
+    if (parkingLots.length) {
+        const bounds = [
+            [userLocation.lat, userLocation.lon],
+            ...parkingLots.map(p => [p.lat, p.lon])
+        ];
+        map.fitBounds(bounds, { padding: [20, 20] });
+    } else {
+        map.setView([userLocation.lat, userLocation.lon], 14);
+    }
 }
 
 function updateParkingList(parkingLots) {
