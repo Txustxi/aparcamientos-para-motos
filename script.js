@@ -13,6 +13,8 @@ const parkingList = document.getElementById('parkingList');
 const message = document.getElementById('message');
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const SEARCH_RADIUS = 1000; // metros
 
 async function getCoordinates(address) {
     try {
@@ -29,6 +31,34 @@ async function getCoordinates(address) {
     return null;
 }
 
+function formatAddress(tags) {
+    const street = tags['addr:street'];
+    const number = tags['addr:housenumber'];
+    if (street) {
+        return number ? `${street} ${number}` : street;
+    }
+    return 'Direcci\u00f3n no disponible';
+}
+
+async function fetchParkingLots(coords) {
+    const query = `[out:json];node[amenity=motorcycle_parking](around:${SEARCH_RADIUS},${coords.lat},${coords.lon});out;`;
+    const url = `${OVERPASS_URL}?data=${encodeURIComponent(query)}`;
+    try {
+        const res = await fetch(url, {
+            headers: { 'User-Agent': 'aparcamiento-motos-demo' }
+        });
+        const data = await res.json();
+        return data.elements.map(el => ({
+            name: el.tags && el.tags.name ? el.tags.name : 'Aparcamiento para motos',
+            address: el.tags ? formatAddress(el.tags) : 'Direcci\u00f3n no disponible',
+            lat: el.lat,
+            lon: el.lon
+        }));
+    } catch (err) {
+        console.error('Error consultando Overpass:', err);
+        return [];
+    }
+}
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -42,38 +72,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 async function searchParkingLots(userLocation) {
     try {
-        const parkingLots = [
-            {
-                name: 'Aparcamiento Central',
-                address: 'Calle Mayor 123',
-                lat: userLocation.lat + 0.005,
-                lon: userLocation.lon + 0.005
-            },
-            {
-                name: 'Parking Plaza',
-                address: 'Plaza del Sol 45',
-                lat: userLocation.lat - 0.003,
-                lon: userLocation.lon + 0.002
-            },
-            {
-                name: 'Garaje Norte',
-                address: 'Avenida Norte 78',
-                lat: userLocation.lat + 0.002,
-                lon: userLocation.lon - 0.003
-            }
-        ];
-
-        const filtered = parkingLots
+        const lots = await fetchParkingLots(userLocation);
+        const sorted = lots
             .map(p => ({
                 ...p,
                 distance: calculateDistance(userLocation.lat, userLocation.lon, p.lat, p.lon)
             }))
             .sort((a, b) => a.distance - b.distance)
-            .slice(0, 5);
+            .slice(0, 20);
 
-        updateMap(userLocation, filtered);
-        updateParkingList(filtered);
-        if (!filtered.length) {
+        updateMap(userLocation, sorted);
+        updateParkingList(sorted);
+        if (!sorted.length) {
             showMessage('No se encontraron aparcamientos cercanos');
         } else {
             clearMessage();
