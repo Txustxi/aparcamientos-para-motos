@@ -7,7 +7,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const locationInput = document.getElementById('locationInput');
 const searchForm = document.getElementById('searchForm');
-const searchButton = document.getElementById('searchButton');
 const geoButton = document.getElementById('geoButton');
 const parkingList = document.getElementById('parkingList');
 const message = document.getElementById('message');
