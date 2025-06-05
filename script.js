@@ -14,14 +14,13 @@ const message = document.getElementById('message');
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const SEARCH_RADIUS = 3000; // metros
-const DEFAULT_CITY = 'Logroño, La Rioja';
+const DEFAULT_CITY = 'Logro\u00f1o, La Rioja';
 
 async function getCoordinates(address) {
     try {
         const res = await fetch(`${NOMINATIM_URL}?q=${encodeURIComponent(address)}&format=json&limit=1`, {
             headers: {
-                'Accept-Language': 'es',
-                'User-Agent': 'AparcamientosMotos/1.0 (example@example.com)'
+                'Accept-Language': 'es'
             }
         });
         const data = await res.json();
@@ -44,24 +43,35 @@ function formatAddress(tags) {
 }
 
 async function fetchParkingLots(coords) {
-    const query = `[out:json];node[amenity=motorcycle_parking](around:${SEARCH_RADIUS},${coords.lat},${coords.lon});out;`;
+    const query = `[
+        out:json
+    ];
+    (
+        node[amenity=motorcycle_parking](around:${SEARCH_RADIUS},${coords.lat},${coords.lon});
+        way[amenity=motorcycle_parking](around:${SEARCH_RADIUS},${coords.lat},${coords.lon});
+        relation[amenity=motorcycle_parking](around:${SEARCH_RADIUS},${coords.lat},${coords.lon});
+    );
+    out center;`;
     const url = `${OVERPASS_URL}?data=${encodeURIComponent(query)}`;
     try {
-        const res = await fetch(url, {
-            headers: { 'User-Agent': 'AparcamientosMotos/1.0 (example@example.com)' }
-        });
+        const res = await fetch(url);
         const data = await res.json();
-        return data.elements.map(el => ({
-            name: el.tags && el.tags.name ? el.tags.name : 'Aparcamiento para motos',
-            address: el.tags ? formatAddress(el.tags) : 'Direcci\u00f3n no disponible',
-            lat: el.lat,
-            lon: el.lon
-        }));
+        return data.elements.map(el => {
+            const lat = el.lat || (el.center && el.center.lat);
+            const lon = el.lon || (el.center && el.center.lon);
+            return {
+                name: el.tags && el.tags.name ? el.tags.name : 'Aparcamiento para motos',
+                address: el.tags ? formatAddress(el.tags) : 'Direcci\u00f3n no disponible',
+                lat,
+                lon
+            };
+        }).filter(p => p.lat && p.lon);
     } catch (err) {
         console.error('Error consultando Overpass:', err);
         return [];
     }
 }
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -156,7 +166,7 @@ function clearMessage() {
 async function handleSearch() {
     const address = locationInput.value.trim();
     if (!address) {
-        showMessage('Por favor, introduce una ubicación');
+        showMessage('Por favor, introduce una ubicaci\u00f3n');
         return;
     }
     clearMessage();
@@ -165,7 +175,7 @@ async function handleSearch() {
         searchParkingLots(coords);
         clearMessage();
     } else {
-        showMessage('No se pudo encontrar la ubicación especificada');
+        showMessage('No se pudo encontrar la ubicaci\u00f3n especificada');
     }
 }
 
@@ -176,7 +186,7 @@ searchForm.addEventListener('submit', e => {
 
 geoButton.addEventListener('click', () => {
     if (!navigator.geolocation) {
-        showMessage('La geolocalización no está disponible');
+        showMessage('La geolocalizaci\u00f3n no est\u00e1 disponible');
         return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -189,12 +199,12 @@ geoButton.addEventListener('click', () => {
             searchParkingLots(coords);
         },
         () => {
-            showMessage('No se pudo obtener tu ubicación');
+            showMessage('No se pudo obtener tu ubicaci\u00f3n');
         }
     );
 });
 
-// Cargar automáticamente los aparcamientos de Logroño al iniciar
+// Cargar autom\u00e1ticamente los aparcamientos de Logro\u00f1o al iniciar
 document.addEventListener('DOMContentLoaded', async () => {
     locationInput.value = DEFAULT_CITY;
     const coords = await getCoordinates(DEFAULT_CITY);
