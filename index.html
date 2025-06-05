@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aparcamientos para Motos</title>
+    <meta name="description" content="Consulta aparcamientos reales para motos en Logroño y otras ciudades" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Aparcamientos para Motos</h1>
+            <p>Encuentra aparcamientos cercanos para tu moto</p>
+        </header>
+        <main>
+            <section class="search-section">
+                <form class="search-container" id="searchForm">
+                    <label for="locationInput" class="sr-only">Ubicación</label>
+                    <input type="text" id="locationInput" placeholder="Introduce una ubicación" aria-label="Ubicación">
+                    <button type="submit" id="searchButton" class="search-button" aria-label="Buscar">
+                        <span class="fa-solid fa-magnifying-glass" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" id="geoButton" class="geo-button">Usar mi ubicación</button>
+                </form>
+                <p id="message" role="alert" class="message" aria-live="polite"></p>
+            </section>
+            <section class="map-section">
+                <div id="map" class="map"></div>
+            </section>
+            <section class="parking-list-section">
+                <h2>Aparcamientos cercanos</h2>
+                <div id="parkingList" class="parking-list"></div>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>Desarrollado por tu equipo de desarrollo</p>
+    </footer>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" defer></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
