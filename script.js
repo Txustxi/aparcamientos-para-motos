@@ -55,6 +55,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+async function showAllParkingLots() {
+    const parkingLots = await fetchParkingData();
+    parkingLots.forEach(p => {
+        L.marker([p.lat, p.lon])
+            .bindPopup(`${p.name}<br>${p.address}`)
+            .addTo(map);
+    });
+    if (parkingLots.length) {
+        map.fitBounds(parkingLots.map(p => [p.lat, p.lon]), { padding: [20, 20] });
+    }
+}
+
 async function searchParkingLots(userLocation) {
     try {
         const parkingLots = await fetchParkingData();
@@ -171,3 +183,5 @@ geoButton.addEventListener('click', () => {
         }
     );
 });
+
+showAllParkingLots();
