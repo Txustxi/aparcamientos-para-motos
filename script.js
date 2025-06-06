@@ -1,5 +1,6 @@
 // Configuraci\u00f3n inicial del mapa
-const map = L.map('map').setView([40.4165, -3.7026], 13);
+// Vista inicial centrada en Logroño (La Rioja)
+const map = L.map('map').setView([42.4668, -2.45], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '\u00a9 OpenStreetMap contributors'
@@ -13,6 +14,20 @@ const parkingList = document.getElementById('parkingList');
 const message = document.getElementById('message');
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+const PARKING_DATA_URL = 'parking_data.json';
+
+async function fetchParkingData() {
+    try {
+        const res = await fetch(PARKING_DATA_URL, {
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    } catch (err) {
+        console.error('Error cargando datos de aparcamientos:', err);
+        return [];
+    }
+}
 
 async function getCoordinates(address) {
     try {
@@ -42,34 +57,14 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 async function searchParkingLots(userLocation) {
     try {
-        const parkingLots = [
-            {
-                name: 'Aparcamiento Central',
-                address: 'Calle Mayor 123',
-                lat: userLocation.lat + 0.005,
-                lon: userLocation.lon + 0.005
-            },
-            {
-                name: 'Parking Plaza',
-                address: 'Plaza del Sol 45',
-                lat: userLocation.lat - 0.003,
-                lon: userLocation.lon + 0.002
-            },
-            {
-                name: 'Garaje Norte',
-                address: 'Avenida Norte 78',
-                lat: userLocation.lat + 0.002,
-                lon: userLocation.lon - 0.003
-            }
-        ];
+        const parkingLots = await fetchParkingData();
 
         const filtered = parkingLots
             .map(p => ({
                 ...p,
                 distance: calculateDistance(userLocation.lat, userLocation.lon, p.lat, p.lon)
             }))
-            .sort((a, b) => a.distance - b.distance)
-            .slice(0, 5);
+            .sort((a, b) => a.distance - b.distance);
 
         updateMap(userLocation, filtered);
         updateParkingList(filtered);
