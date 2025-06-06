@@ -65,6 +65,7 @@ async function showAllParkingLots() {
     if (parkingLots.length) {
         map.fitBounds(parkingLots.map(p => [p.lat, p.lon]), { padding: [20, 20] });
     }
+    updateParkingList(parkingLots);
 }
 
 async function searchParkingLots(userLocation) {
@@ -120,11 +121,14 @@ function updateParkingList(parkingLots) {
     parkingLots.forEach(p => {
         const item = document.createElement('div');
         item.className = 'parking-item';
-        item.innerHTML = `
+        let html = `
             <h3>${p.name}</h3>
             <p>${p.address}</p>
-            <p>Distancia: <span class="distance">${p.distance.toFixed(2)} km</span></p>
         `;
+        if (typeof p.distance === 'number') {
+            html += `<p>Distancia: <span class="distance">${p.distance.toFixed(2)} km</span></p>`;
+        }
+        item.innerHTML = html;
         parkingList.appendChild(item);
     });
 }
