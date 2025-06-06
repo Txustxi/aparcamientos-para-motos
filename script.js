@@ -16,6 +16,20 @@ const message = document.getElementById('message');
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const PARKING_DATA_URL = 'parking_data.json';
 
+// Copia integrada de los datos de aparcamientos para funcionar sin servidor
+const DEFAULT_PARKING_DATA = [
+  { "name": "Aparcamiento Motos Mercado", "address": "Plaza del Mercado, Logro\u00f1o", "lat": 42.4667, "lon": -2.4444 },
+  { "name": "Aparcamiento Motos Portales", "address": "Calle Portales 48, Logro\u00f1o", "lat": 42.4664, "lon": -2.4457 },
+  { "name": "Aparcamiento Motos Espol\u00f3n", "address": "Paseo del Espol\u00f3n, Logro\u00f1o", "lat": 42.4644, "lon": -2.4466 },
+  { "name": "Aparcamiento Motos La Paz", "address": "Avenida de la Paz 65, Logro\u00f1o", "lat": 42.4625, "lon": -2.4379 },
+  { "name": "Aparcamiento Motos San Miguel", "address": "Parque San Miguel, Logro\u00f1o", "lat": 42.47, "lon": -2.4368 },
+  { "name": "Aparcamiento Motos Universidad", "address": "Universidad de La Rioja, Logro\u00f1o", "lat": 42.4709, "lon": -2.4451 },
+  { "name": "Aparcamiento Motos San Agust\u00edn", "address": "Calle San Agust\u00edn 12, Logro\u00f1o", "lat": 42.4663, "lon": -2.4481 },
+  { "name": "Aparcamiento Motos Huesca", "address": "Calle Huesca 12, Logro\u00f1o", "lat": 42.4641, "lon": -2.4367 },
+  { "name": "Aparcamiento Motos Estaci\u00f3n Bus", "address": "Estaci\u00f3n de Autobuses, Logro\u00f1o", "lat": 42.4605, "lon": -2.4514 },
+  { "name": "Aparcamiento Motos Burgos", "address": "Avenida de Burgos 104, Logro\u00f1o", "lat": 42.4667, "lon": -2.4579 }
+];
+
 async function fetchParkingData() {
     try {
         const res = await fetch(PARKING_DATA_URL, {
@@ -25,7 +39,7 @@ async function fetchParkingData() {
         return await res.json();
     } catch (err) {
         console.error('Error cargando datos de aparcamientos:', err);
-        return [];
+        return DEFAULT_PARKING_DATA;
     }
 }
 
